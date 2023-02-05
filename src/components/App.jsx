@@ -1,25 +1,48 @@
 import ContactsList from './ContactsList/ContactsList.jsx';
-import { useSelector } from 'react-redux';
-import { getContacts } from '../redux/selectors.js';
-
+import { useSelector, useDispatch } from 'react-redux';
+import { getContactsState } from '../redux/selectors.js';
+import { getContactsThunk } from '../redux/operations.js';
 import PhonebookEditor from './PhonebookEditor/PhonebookEditor.jsx';
 import Section from './Section/Section.jsx';
 import Filter from './Filter/Filter.jsx';
+import { useEffect } from 'react';
+import AppToastContainer from '../components/AppToastContainer/AppToastContainer';
 
 function App() {
-    const contacts = useSelector(getContacts);
+    const { items, status, error } = useSelector(getContactsState);
+    const dispatch = useDispatch();
+
+    useEffect(() => {
+        dispatch(getContactsThunk());
+    }, [dispatch]);
+
+    if (status === 'loading')
+        return (
+            <Section title="Phonebook">
+                <PhonebookEditor />
+                <h1>ОНОВЛЕННЯ ДАНИХ</h1>
+            </Section>
+        );
+    if (error) return <h1>{error}</h1>;
 
     return (
         <>
             <Section title="Phonebook">
                 <PhonebookEditor />
             </Section>
-            {contacts.length > 0 && (
+            {items.length > 0 && (
                 <Section title="Contacts">
                     <Filter />
                     <ContactsList />
                 </Section>
             )}
+            {items.length === 0 && (
+                <Section title="Contacts">
+                    <Filter />
+                    <p>У Вас немає збереженних контактів, додайте</p>
+                </Section>
+            )}
+            <AppToastContainer />
         </>
     );
 }

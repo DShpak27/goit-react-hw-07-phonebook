@@ -1,8 +1,8 @@
 import { useSelector, useDispatch } from 'react-redux';
 import { getContacts } from '../../redux/selectors.js';
 import { getFilterValue } from '../../redux/selectors.js';
-import { deleteContact } from '../../redux/contactsSlice.js';
 import styles from './ContactsList.module.scss';
+import { deleteContactThunk } from '../../redux/operations.js';
 
 function filterContacts(allContacts, filterValue) {
     if (filterValue !== '') {
@@ -19,13 +19,13 @@ const ContactsList = () => {
     const filterValue = useSelector(getFilterValue); // строка
     const filteredContacts = filterContacts(allContacts, filterValue); //масив
 
-    const handleDeleteBtn = id => dispatch(deleteContact(id));
+    const handleDeleteBtn = id => dispatch(deleteContactThunk(id));
 
     return (
         <ul className={styles.list}>
-            {filteredContacts.map(({ name, number, id }) => (
+            {filteredContacts.map(({ name, phone, id }) => (
                 <li className={styles.item} key={id}>
-                    {name}: {number}
+                    {name}: {phone}
                     <button
                         className={styles.button}
                         type="button"

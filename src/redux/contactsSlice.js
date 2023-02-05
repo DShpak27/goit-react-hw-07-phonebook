@@ -1,43 +1,56 @@
-import { createSlice, nanoid } from '@reduxjs/toolkit';
+import { toast } from 'react-toastify';
+import { createSlice } from '@reduxjs/toolkit';
+import { getContactsThunk } from './operations';
+import { deleteContactThunk } from './operations';
+import { addContactThunk } from './operations';
 const contactsInitialState = {
-    contacts: [
-        { id: 'id-1', name: 'Rosie Simpson', number: '459-12-56' },
-        { id: 'id-2', name: 'Hermione Kline', number: '443-89-12' },
-        { id: 'id-3', name: 'Eden Clements', number: '645-17-79' },
-        { id: 'id-4', name: 'Annie Copeland', number: '227-91-26' },
-        { id: 'id-5', name: 'Alexa Nuland', number: '581-44-12' },
-        { id: 'id-6', name: 'Peter Sill', number: '890-01-14' },
-        { id: 'id-7', name: 'Liza Shirow', number: '397-55-66' },
-        { id: 'id-8', name: 'John Smith', number: '566-09-11' },
-    ],
+    contacts: {
+        items: [],
+        status: null,
+        error: null,
+    },
 };
+
 const contactsSlice = createSlice({
     name: 'contacts',
     initialState: contactsInitialState,
-    reducers: {
-        addContact: {
-            reducer(state, action) {
-                state.contacts.push(action.payload);
-            },
-            prepare(name, number) {
-                return {
-                    payload: {
-                        name,
-                        number,
-                        id: nanoid(),
-                    },
-                };
-            },
-        },
-        deleteContact: {
-            reducer(state, action) {
-                const index = state.contacts.findIndex(
-                    contact => contact.id === action.payload
+    extraReducers: builder => {
+        builder
+            .addCase(getContactsThunk.pending, state => {
+                state.contacts.error = null;
+                state.contacts.status = 'loading';
+            })
+            .addCase(getContactsThunk.fulfilled, (state, action) => {
+                state.contacts.error = null;
+                state.contacts.status = 'resolved';
+                state.contacts.items = action.payload;
+            })
+            .addCase(getContactsThunk.rejected, (state, action) => {
+                state.contacts.status = 'rejected';
+                state.contacts.error = action.payload;
+            })
+            .addCase(deleteContactThunk.fulfilled, (state, action) => {
+                state.contacts.error = null;
+                const id = action.payload;
+                state.contacts.items = state.contacts.items.filter(
+                    item => item.id !== id
                 );
-                state.contacts.splice(index, 1);
-            },
-        },
+                toast.success('contact was deleted');
+            })
+            .addCase(deleteContactThunk.rejected, state => {
+                state.contacts.status = 'rejected';
+                toast.error('Контакт не видален, спробуй ще');
+            })
+            .addCase(addContactThunk.fulfilled, (state, action) => {
+                state.contacts.error = null;
+                state.contacts.status = 'resolved';
+                state.contacts.items.push(action.payload);
+                toast.success('Контакт додан');
+            })
+            .addCase(addContactThunk.rejected, state => {
+                state.contacts.status = 'rejected';
+                toast.error('Контакт не додан, спробуй ще раз');
+            });
     },
 });
-export const { addContact, deleteContact } = contactsSlice.actions;
 export const contactsReducer = contactsSlice.reducer;

@@ -1,8 +1,9 @@
 import { nanoid } from 'nanoid';
 import { useDispatch, useSelector } from 'react-redux';
-import { addContact } from '../../redux/contactsSlice.js';
-import { getContacts } from '../../redux/selectors.js';
+import { getContacts } from '../../redux/selectors';
 import styles from './PhonebookEditor.module.scss';
+import { toast } from 'react-toastify';
+import { addContactThunk } from '../../redux/operations';
 
 function checkOnSameName(contacts, name) {
     return Boolean(
@@ -20,15 +21,15 @@ const PhonebookEditor = () => {
         event.preventDefault();
         const form = event.target;
         const name = form.elements.name.value;
-        const number = form.elements.number.value;
+        const phone = form.elements.number.value;
 
         if (name === '') return;
 
         if (checkOnSameName(allContacts, name)) {
-            return alert(`${name} is already in contacts`);
+            return toast.info(`${name} is already in contacts`);
         }
 
-        dispatch(addContact(name, number));
+        dispatch(addContactThunk({ name, phone }));
         form.reset();
     };
 

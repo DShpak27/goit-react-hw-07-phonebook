@@ -8,12 +8,7 @@ import styles from './Filter.module.scss';
 const Filter = () => {
     const dispatch = useDispatch();
     const filterValue = useSelector(getFilterValue);
-    // const [filter, setFilter] = useLocalStorage('filter');
 
-    // const getInputData = evt => {
-    //     setFilter(evt.currentTarget.value);
-    //     onFilterChange(evt.currentTarget.value);
-    // };
     const handleInputChange = evt => {
         const newFilterValue = evt.target.value;
         dispatch(setFilterValue(newFilterValue));
